@@ -2,7 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+venv
+.idea
+.vscode
+__pycache__
+.DS_Store
+.env
 # C extensions
 *.so
 
