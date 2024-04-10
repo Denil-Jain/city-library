@@ -31,8 +31,7 @@
                 <tr>
                     <th>Document ID</th>
                     <th>Title</th>
-                    <th>Publish Date</th>
-                    <th>Publisher ID</th>
+                    <th>Publisher</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,8 +39,7 @@
                     <tr>
                         <td>{{ document.DOCID }}</td>
                         <td>{{ document.TITLE }}</td>
-                        <td>{{ document.PDATE }}</td>
-                        <td>{{ document.PUBLISHERID }}</td>
+                        <td>{{ document.PUBNAME }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

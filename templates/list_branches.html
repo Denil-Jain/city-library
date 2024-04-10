@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}Branch Information{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Branch Information</h3>
+    <form method="GET">
+        <div class="row">
+            <div class="col">
+                <label for="bname">Branch Name</label>
+                <input type="text" class="form-control" id="bname" name="bname" placeholder="Branch Name" value="{{ request.args.get('bname') or ''}}">
+            </div>
+            <div class="col">
+                <label for="blocation">Location</label>
+                <input type="text" class="form-control" id="blocation" name="blocation" placeholder="Location" value="{{ request.args.get('blocation') or '' }}">
+            </div>
+            <div class="col">
+                <label for="limit">Limit</label>
+                <input type="number" class="form-control" id="limit" name="limit" placeholder="limit" value="{{ request.args.get('limit') or '10' }}">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col">
+                <a href="?" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+    {% if branches %}
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for branch in branches %}
+                    <tr>
+                        <td>{{ branch.BID }}</td>
+                        <td>{{ branch.BNAME }}</td>
+                        <td>{{ branch.BLOCATION }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No branches found.</p>
+    {% endif %}
+</div>
+{% endblock %}

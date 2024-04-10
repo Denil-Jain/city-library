@@ -222,3 +222,53 @@ def upload_persons():
             else:
                 flash('No persons were loaded', "info")
     return render_template("upload.html")
+
+
+@upload.route("/upload_branches", methods=["GET", "POST"])
+def upload_branches():
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return redirect(request.url)
+        file = request.files['file']
+        
+        if file.filename == '':
+            flash('No selected file', "warning")
+            return redirect(request.url)
+        
+        if ".csv" not in file.filename:
+            flash('Select CSV file', "warning")
+            return redirect(request.url)
+        if file and secure_filename(file.filename):
+            branches = []
+            branches_query = """
+            INSERT INTO BRANCH (BID, BNAME, BLOCATION)
+            VALUES (%(BID)s, %(BNAME)s, %(BLOCATION)s)
+            ON DUPLICATE KEY UPDATE 
+            BNAME=VALUES(BNAME),
+            BLOCATION=VALUES(BLOCATION);
+            """
+            
+            stream = io.TextIOWrapper(file.stream._file, "UTF8", newline=None)
+            try:
+                for row in csv.DictReader(stream):
+                    branch = {
+                        'BID': row['BID'],
+                        'BNAME': row['BNAME'],
+                        'BLOCATION': row['LOCATION']
+                    }
+                    branches.append(branch)
+            except:
+                flash("Error while loading data",'danger')
+            if len(branches) > 0:
+                print(f"Inserting or updating {len(branches)} branches")
+                try:
+                    # Assuming DB has a method `insertMany` that can execute the given query on many records
+                    result = DB.insertMany(branches_query, branches)
+                    message = f"{len(branches)} branches inserted or updated"
+                    flash(message, "success")
+                except Exception as e:
+                    traceback.print_exc()
+                    flash("There was an error loading in the csv data", "danger")
+            else:
+                flash('No branches were loaded', "info")
+    return render_template("upload.html")

@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}Add Reader{% endblock %}
+{% block content %}
+<div class="container mt-1">
+    <form method="POST">
+        <div class="form-group row mb-3">
+            <label for="RID" class="col-sm-2 col-form-label">Reader ID</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="RID" name="RID" placeholder="Reader ID" value="{{reader.RID or ''}}"  min="4">
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="RTYPE" class="col-sm-2 col-form-label">Reader Type</label>
+            <div class="col-sm-10">
+                <select class="form-select" id="RTYPE" name="RTYPE" aria-label="Default select example">
+                    <option>Select Type</option>
+                    <option value="Student" {{ 'selected' if reader.RTYPE|string == "Student" }} >Student</option>
+                    <option value="Senior Citizen" {{ 'selected' if reader.RTYPE|string == "Senior Citizen" }} >Senior Citizen</option>
+                    <option value="Staff" {{ 'selected' if reader.RTYPE|string == "Staff" }} >Staff</option>
+                    <option value="Other" {{ 'selected' if reader.RTYPE|string == "Other" }} >Other</option>
+                </select>                
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="RNAME" class="col-sm-2 col-form-label">Reader Name</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="RNAME" name="RNAME" placeholder="Reader Name" value="{{reader.RNAME or ''}}">
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="RADDRESS" class="col-sm-2 col-form-label">Reader ADDRESS</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="RADDRESS" name="RADDRESS" placeholder="Reader ADDRESS" value="{{reader.RADDRESS or ''}}">
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="PHONE_NO" class="col-sm-2 col-form-label">Phone Number</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="PHONE_NO" name="PHONE_NO" placeholder="PHONE NO" value="{{reader.PHONE_NO or ''}}"  min="4">
+            </div>
+        </div>
+        <input type="submit" class="btn btn-primary" style="margin-bottom: 5em" value="Save Document" />
+    </form>
+</div>
+{% endblock %}

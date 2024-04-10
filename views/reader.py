@@ -18,8 +18,8 @@ def search_documents():
     documents = []
     
     query = """
-    SELECT DOCID, TITLE, PDATE, PUBLISHERID
-    FROM DOCUMENT
+    SELECT DOCID, TITLE, PUBNAME
+    FROM DOCUMENT NATURAL JOIN PUBLISHER
     WHERE 1=1
     """
     args = {}
@@ -37,7 +37,7 @@ def search_documents():
         args["title"] = f"%{title}%"
     
     if publisher_name:
-        query += " AND PUBLISHERID IN (SELECT PUBLISHERID FROM PUBLISHER WHERE PUBNAME LIKE %(publisher_name)s)"
+        query += " AND PUBNAME LIKE %(publisher_name)s"
         args["publisher_name"] = f"%{publisher_name}%"
     
     try:

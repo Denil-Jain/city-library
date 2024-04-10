@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}Add Document{% endblock %}
+{% block content %}
+{% from "publisher_dropdown.html" import publisher_dropdown %}
+<div class="container">
+    <form method="POST">
+        <div class="form-group row mb-3">
+            <label for="DOCID" class="col-sm-2 col-form-label">Document ID</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="DOCID" name="DOCID" placeholder="Document ID" value="{{document.DOCID or ''}}"  min="4">
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="TITLE" class="col-sm-2 col-form-label">Document Title</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="TITLE" name="TITLE" placeholder="Title" value="{{document.TITLE or ''}}"  min="3">
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="PDATE" class="col-sm-2 col-form-label">Published Date</label>
+            <div class="col-sm-10">
+                <input type="date" class="form-control" id="PDATE" name="PDATE" placeholder="Published Date" value="{{document.PDATE or ''}}">
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="organization_id" class="col-sm-2 col-form-label">Publisher</label>
+            <div class="col-sm-10">
+                {# using this to get publishers names and id #}
+                {{ publisher_dropdown(val=document.get("PUBLISHERID")) }}
+            </div>
+        </div>
+        <input type="submit" class="btn btn-primary" style="margin-bottom: 5em" value="Save Document" />
+    </form>
+</div>
+{% endblock %}
