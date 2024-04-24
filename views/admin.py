@@ -1,6 +1,6 @@
 # Administrative Functions Menu:
 # - Add a document copy. (#Add Document 10/04/2024)
-# - Search document copy and check its status.
+# - Search document copy and check its status. (#DONE 23/04/2024)
 # - Add new reader. (#Add READER 10/04/2024 /admin/add_reader)
 # - Print branch information (name and location).(# with filter 10/04/2024)
 # - Get number N and branch number I as input and print the top N most frequent borrowers (Rid and name) in branch I and the number of books each has borrowed.
@@ -69,6 +69,40 @@ def add_document():
                 flash(str(e), "danger")
 
     return render_template("manage_document.html",document = request.form)
+
+# Search document copy
+@admin.route("/document_copies", methods=["GET"])
+def list_document_copies():
+    doc_name_filter = request.args.get('doc_name')
+    doc_id_filter = request.args.get('doc_id')
+    bid_filter = request.args.get('bid')
+    
+    args = {}
+    query = """
+        SELECT C.COPYNO, D.DOCID, D.TITLE, D.PUBLISHERID, B.BID, B.BNAME, B.BLOCATION
+        FROM DOCUMENT D
+        JOIN COPY C ON D.DOCID = C.DOCID
+        JOIN BRANCH B ON C.BID = B.BID
+        WHERE 1=1
+    """
+    if doc_name_filter:
+        query += " AND D.TITLE LIKE %(doc_name)s "
+        args["doc_name"] = f'%{doc_name_filter}%'
+    if doc_id_filter:
+        query += " AND D.DOCID = %(doc_id)s "
+        args["doc_id"] = doc_id_filter
+    if bid_filter:
+        query += " AND B.BID = %(bid)s "
+        args["bid"] = bid_filter
+    
+    try:
+        result = DB.selectAll(query, args)
+        copies = result.rows if result.status else []
+    except Exception as e:
+        flash(str(e), "danger")
+        copies = []
+
+    return render_template("list_document_copies.html", copies=copies)
 
 
 @admin.route("/add_reader", methods=["GET","POST"])

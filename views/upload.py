@@ -8,8 +8,8 @@ upload = Blueprint('upload', __name__, url_prefix='/upload')
 
 
 
-@upload.route("/import", methods=["GET","POST"])
-def importCSV():
+@upload.route("/upload_readers", methods=["GET","POST"])
+def upload_readers():
     if request.method == "POST":
         if 'file' not in request.files:
             return redirect(request.url)
