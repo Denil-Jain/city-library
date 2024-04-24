@@ -153,7 +153,7 @@ def list_branches():
     else:
         query += " LIMIT %(limit)s"
         args['limit'] = int(limit)
-    print(query,args)
+    #print(query,args)
     try:
         result = DB.selectAll(query, args)
         branches = result.rows if result.status else []

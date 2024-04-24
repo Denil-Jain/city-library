@@ -272,3 +272,58 @@ def upload_branches():
             else:
                 flash('No branches were loaded', "info")
     return render_template("upload.html")
+
+
+
+
+@upload.route("/upload_copys", methods=["GET", "POST"])
+def upload_copys():
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return redirect(request.url)
+        file = request.files['file']
+        
+        if file.filename == '':
+            flash('No selected file', "warning")
+            return redirect(request.url)
+        
+        if ".csv" not in file.filename:
+            flash('Select CSV file', "warning")
+            return redirect(request.url)
+        if file and secure_filename(file.filename):
+            copys = []
+            copys_query = """
+            INSERT INTO COPY (DOCID, COPYNO, BID,POSITION)
+            VALUES (%(DOCID)s, %(COPYNO)s, %(BID)s, %(POSITION)s)
+            ON DUPLICATE KEY UPDATE 
+            DOCID=VALUES(DOCID),
+            COPYNO=VALUES(COPYNO),
+            BID=VALUES(BID),
+            POSITION=VALUES(POSITION);
+            """
+            
+            stream = io.TextIOWrapper(file.stream._file, "UTF8", newline=None)
+            try:
+                for row in csv.DictReader(stream):
+                    branch = {
+                        'DOCID': row['DOCID'],
+                        'COPYNO': row['COPYNO'],
+                        'BID': row['BID'],
+                        'POSITION': row['POSITION']
+                    }
+                    copys.append(branch)
+            except:
+                flash("Error while loading data",'danger')
+            if len(copys) > 0:
+                print(f"Inserting or updating {len(copys)} branches")
+                try:
+                    # Assuming DB has a method `insertMany` that can execute the given query on many records
+                    result = DB.insertMany(copys_query, copys)
+                    message = f"{len(copys)} copys inserted or updated"
+                    flash(message, "success")
+                except Exception as e:
+                    traceback.print_exc()
+                    flash("There was an error loading in the csv data", "danger")
+            else:
+                flash('No copys were loaded', "info")
+    return render_template("upload.html")
