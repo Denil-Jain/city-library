@@ -1,8 +1,8 @@
 # Search a document by ID, title, or publisher name.(#DONE/09/04/24)
 # Document checkout. (#route(/list_document_copies)) (#route /checkout #DONE 23/04/24)
-# Document return.
+# Document return. (#route(/return)) #DONE 24/04/24)
 # Document reserve.
-# Compute fine for a document copy borrowed by a reader based on the current date.
+# Compute fine for a document copy borrowed by a reader based on the current date. (#While returning a document Fine is calculated. #24/04/24)
 # Print the list of documents reserved by a reader and their status.
 # Print the document id and document titles of documents published by a publisher. (#DONE 09/04/24 already added route('/reader/search_documents'))
 # Quit.
@@ -54,12 +54,13 @@ def search_documents():
 @reader.route("/list_document_copies", methods=["GET"])
 def list_document_copies():
     copies = []
-    
+    args= {}
     query = """
     SELECT C.COPYNO, C.DOCID, D.TITLE, D.PUBLISHERID, C.BID, B.BNAME, B.BLOCATION
     FROM COPY C
     INNER JOIN DOCUMENT D ON C.DOCID = D.DOCID
     LEFT JOIN BRANCH B ON C.BID = B.BID
+    NATURAL JOIN PUBLISHER
     WHERE NOT EXISTS (
         SELECT 1
         FROM BORROWS BOR NATURAL JOIN BORROWING
@@ -69,9 +70,24 @@ def list_document_copies():
         AND BORROWING.RDTIME IS NULL
     )
     """
+    doc_id = request.args.get("doc_id")
+    title = request.args.get("doc_name")
+    publisher_name = request.args.get("publisher_name")
+    
+    if doc_id:
+        query += " AND C.DOCID = %(doc_id)s"
+        args["doc_id"] = doc_id
+    
+    if title:
+        query += " AND D.TITLE LIKE %(title)s"
+        args["title"] = f"%{title}%"
+    
+    if publisher_name:
+        query += " AND PUBNAME LIKE %(publisher_name)s"
+        args["publisher_name"] = f"%{publisher_name}%"
     
     try:
-        result = DB.selectAll(query)
+        result = DB.selectAll(query,args)
         if result.status:
             copies = result.rows
     except Exception as e:
@@ -155,3 +171,63 @@ def checkout():
             return redirect(url_for("reader.list_document_copies"))
 
         return render_template("checkout.html", copy_info=copy_info)
+    
+@reader.route("/return_copy", methods=["GET", "POST"])
+def return_copy():
+    RID = request.args.get("RID")
+    if not RID:
+        return render_template("return_copy.html")
+    DOCID = request.args.get("DOCID")
+    COPYNO = request.args.get("COPYNO")
+    BID = request.args.get("BID")
+    BOR_NO = request.args.get("BOR_NO")
+    
+    if RID and not DOCID:
+        try:
+            query = """ SELECT * 
+                        FROM COPY C JOIN BORROWS B ON C.`DOCID` = B.`DOCID`AND C.`COPYNO` = B.`COPYNO` AND C.BID = B.`BID`  
+                            JOIN BORROWING ON `BORROWING`.`BOR_NO` = B.`BOR_NO` 
+                            NATURAL JOIN READER 
+                            JOIN DOCUMENT ON DOCUMENT.`DOCID` = C.`DOCID` 
+                        WHERE RID = %(RID)s AND RDTIME IS NULL"""
+            result = DB.selectAll(query,{"RID":RID})
+            if result.status and len(result.rows)>0:
+                # print(result.rows)
+                return render_template("return_copy.html",copies=result.rows,reader_name=result.rows[0]["RNAME"])
+            else:
+                flash("Nothing to Return","warning")
+                return render_template("return_copy.html",copies=result.rows)
+        except Exception as e:
+            flash(f"Error retrieving borrowed copy inforamtion: {e}", "danger")
+            return render_template("return_copy.html")
+    else:
+        try:
+            query = """
+                    SELECT RNAME,
+                        CASE
+                            WHEN RDTIME IS NULL THEN DATEDIFF(CURRENT_DATE(), BDTIME) - 20
+                            ELSE DATEDIFF(RDTIME, BDTIME) - 20
+                        END AS days_overdue,
+                        CASE
+                            WHEN RDTIME IS NULL THEN (CASE WHEN DATEDIFF(CURRENT_DATE(), BDTIME) > 20 THEN (DATEDIFF(CURRENT_DATE(), BDTIME) - 20) * 0.20 ELSE 0 END)
+                            ELSE (CASE WHEN DATEDIFF(RDTIME, BDTIME) > 20 THEN (DATEDIFF(RDTIME, BDTIME) - 20) * 0.20 ELSE 0 END)
+                        END AS fine
+                    FROM BORROWING NATURAL JOIN BORROWS NATURAL JOIN READER
+                    WHERE BOR_NO = %(BOR_NO)s
+                    AND DOCID = %(DOCID)s
+                    AND COPYNO = %(COPYNO)s
+                    AND BID = %(BID)s;
+                    """
+            print(BOR_NO,DOCID,COPYNO,BID)
+            print(query)
+            result = DB.selectAll(query,{"BOR_NO" : BOR_NO , "DOCID" : DOCID, "COPYNO": COPYNO, "BID":BID})
+            print(result.status)
+            current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            result_update = DB.update("UPDATE BORROWING SET RDTIME = %(current_time)s WHERE BOR_NO = %(BOR_NO)s", {"BOR_NO" : BOR_NO, "current_time" : current_time})
+            if result.status:
+                flash(f"{result.rows[0]['RNAME']}'s Document Returned AND Fine :{result.rows[0]['fine']}","success")
+                return render_template(f"return_copy.html",RID=RID)
+        except Exception as e:
+            flash(f"Error {e}", "danger")
+            return render_template("return_copy.html")
+        
