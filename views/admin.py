@@ -3,10 +3,10 @@
 # - Search document copy and check its status. (#DONE 23/04/2024)
 # - Add new reader. (#Add READER 10/04/2024 /admin/add_reader)
 # - Print branch information (name and location).(# with filter 10/04/2024)
-# - Get number N and branch number I as input and print the top N most frequent borrowers (Rid and name) in branch I and the number of books each has borrowed.
-# - Get number N as input and print the top N most frequent borrowers (Rid and name) in the library and the number of books each has borrowed.
-# - Get number N and branch number I as input and print the N most borrowed books in branch I.
-# - Get number N as input and print the N most borrowed books in the library.
+# - Get number N and branch number I as input and print the top N most frequent borrowers (Rid and name) in branch I and the number of books each has borrowed. (#DONE 24-04-2024 route(/frequent_borrower))
+# - Get number N as input and print the top N most frequent borrowers (Rid and name) in the library and the number of books each has borrowed. (#DONE 24-04-2024 route(/frequent_borrower))
+# - Get number N and branch number I as input and print the N most borrowed books in branch I. (#DONE 24-04-2024 route(/branch_most_borrowed_books))
+# - Get number N as input and print the N most borrowed books in the library. (#DONE 24-04-2024 route(/most_borrowed_books))
 # - Get a year as input and print the 10 most popular books of that year in the library.
 # - Get a start date S and an end date E as input and print, for each branch, the branch
 # Id and name and the average fine paid by the borrowers for documents borrowed
@@ -196,3 +196,105 @@ def list_branches():
         branches = []
 
     return render_template("list_branches.html", branches=branches)
+
+# - Get number N as input and print the N most borrowed books in the library.
+@admin.route("/most_borrowed_books", methods=["GET","POST"])
+def most_borrowed_books():
+    documents = []
+    
+    query = """
+    SELECT DOCID, TITLE, PUBNAME
+    FROM BORROWS NATURAL JOIN DOCUMENT NATURAL JOIN PUBLISHER
+    GROUP BY DOCID, TITLE, PUBNAME
+    ORDER BY COUNT(DOCID) DESC
+    """
+    args = {}
+    
+    TOP_B = request.args.get("TOP_B")
+    
+    if TOP_B:
+        query += F" LIMIT {TOP_B}"
+    else:
+        query += F" LIMIT 10"
+    
+    try:
+        result = DB.selectAll(query, args)
+        if result.status:
+            documents = result.rows
+    except Exception as e:
+        traceback.print_exc()
+        flash("There was an error searching the documents", "danger")
+    
+    return render_template("most_borrowed_books.html", documents=documents)
+
+
+
+# - Get number N and branch number I as input and print the N most borrowed books in branch I
+@admin.route("/branch_most_borrowed_books", methods=["GET","POST"])
+def branch_most_borrowed_books():
+    documents = []
+    
+    query = """
+    SELECT DOCID, TITLE, PUBNAME
+    FROM BORROWS NATURAL JOIN DOCUMENT NATURAL JOIN PUBLISHER
+    WHERE 1=1 
+    """
+    args = {}
+    
+    TOP_B = request.args.get("TOP_B")
+    BID = request.args.get("BID")
+    
+    if BID:
+        query += f" AND BID = {BID} "
+
+    query+= '''GROUP BY DOCID, TITLE, PUBNAME
+                ORDER BY COUNT(DOCID) DESC'''
+    if TOP_B:
+        query += F" LIMIT {TOP_B}"
+    else:
+        query += F" LIMIT 10"
+    
+    try:
+        result = DB.selectAll(query, args)
+        if result.status:
+            documents = result.rows
+    except Exception as e:
+        traceback.print_exc()
+        flash(f"There was an error searching the documents: {e}", "danger")
+    
+    return render_template("branch_most_borrowed_books.html", documents=documents)
+
+# - Get number N and branch number I as input and print the top N most frequent borrowers (Rid and name) in branch I and the number of books each has borrowed.
+@admin.route("/frequent_borrower", methods=["GET","POST"])
+def frequent_borrower():
+    reader = []
+    
+    query = """
+    SELECT RID, RNAME, COUNT(DOCID) AS NBOOKS
+    FROM BORROWS NATURAL JOIN READER
+    WHERE 1=1 
+    """
+    args = {}
+    
+    TOP_B = request.args.get("TOP_B")
+    BID = request.args.get("BID")
+    
+    if BID:
+        query += f" AND BID = {BID} "
+
+    query+= '''GROUP BY RID, RNAME
+                ORDER BY COUNT(DOCID) DESC'''
+    if TOP_B:
+        query += F" LIMIT {TOP_B}"
+    else:
+        query += F" LIMIT 10"
+    
+    try:
+        result = DB.selectAll(query, args)
+        if result.status:
+            reader = result.rows
+    except Exception as e:
+        traceback.print_exc()
+        flash(f"There was an error searching the documents: {e}", "danger")
+    
+    return render_template("frequent_borrower.html", readers=reader)
