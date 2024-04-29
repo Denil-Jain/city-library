@@ -39,15 +39,26 @@
     </div>
 
     <div class="container">
-        <form method="POST">
-            <div class="mb-3">
-                <label for="ReaderId" class="form-label">Reader ID</label>
-                <input type="text" class="form-control" id="ReaderId" name="ReaderId">
-                <div id="ReaderHelp" class="form-text">Enter your ID</div>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
+        <div class="row">
+            <h1>READER</h1>
+            <a href="/reader/search_documents" class="btn btn-secondary btn-lg btn-block m-1">/search_documents</a>
+            <a href="/reader/list_document_copies" class="btn btn-secondary btn-lg btn-block m-1">/Checkout</a>
+            <a href="/reader/return_copy" class="btn btn-secondary btn-lg btn-block m-1">return_copy</a>
+            
+        </div>
+        <div class="row">
+            <h1>ADMIN</h1>
+            <a href="/admin/add_document" class="btn btn-secondary btn-lg btn-block m-1">add_document</a>
+            <a href="/admin/document_copies" class="btn btn-secondary btn-lg btn-block m-1">document_copies</a>
+            <a href="/admin/add_reader" class="btn btn-secondary btn-lg btn-block m-1">add_reader</a>
+            <a href="/admin/branches" class="btn btn-secondary btn-lg btn-block m-1">branches</a>
+            <a href="/admin/most_borrowed_books" class="btn btn-secondary btn-lg btn-block m-1">most_borrowed_books</a>
+            <a href="/admin/branch_most_borrowed_books" class="btn btn-secondary btn-lg btn-block m-1">branch_most_borrowed_books</a>
+            <a href="/admin/frequent_borrower" class="btn btn-secondary btn-lg btn-block m-1">frequent_borrower</a>
+            <a href="/admin/books_of_year" class="btn btn-secondary btn-lg btn-block m-1">books_of_year</a>
+        </div>
+    </div>    
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>

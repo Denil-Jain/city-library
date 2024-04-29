@@ -7,7 +7,7 @@
 # - Get number N as input and print the top N most frequent borrowers (Rid and name) in the library and the number of books each has borrowed. (#DONE 24-04-2024 route(/frequent_borrower))
 # - Get number N and branch number I as input and print the N most borrowed books in branch I. (#DONE 24-04-2024 route(/branch_most_borrowed_books))
 # - Get number N as input and print the N most borrowed books in the library. (#DONE 24-04-2024 route(/most_borrowed_books))
-# - Get a year as input and print the 10 most popular books of that year in the library.
+# - Get a year as input and print the 10 most popular books of that year in the library. (#DONE 28-04-2024 route(/books_of_year))
 # - Get a start date S and an end date E as input and print, for each branch, the branch
 # Id and name and the average fine paid by the borrowers for documents borrowed
 # from this branch during the corresponding period of time.
@@ -298,3 +298,27 @@ def frequent_borrower():
         flash(f"There was an error searching the documents: {e}", "danger")
     
     return render_template("frequent_borrower.html", readers=reader)
+
+
+# - Get a year as input and print the 10 most popular books of that year in the library.
+@admin.route("/books_of_year", methods=["GET","POST"])
+def books_of_year():
+    documents = []
+    YEAR = request.args.get("YEAR")
+    query = f"""
+    SELECT DOCID, TITLE, PUBNAME , COUNT(DOCID) AS COUNT
+    FROM BORROWS NATURAL JOIN DOCUMENT NATURAL JOIN PUBLISHER NATURAL JOIN BORROWING
+    WHERE YEAR(BDTIME) = {YEAR}
+    GROUP BY DOCID, TITLE, PUBNAME
+    ORDER BY COUNT(DOCID) DESC
+    """
+    if YEAR:
+        try:
+            result = DB.selectAll(query, {})
+            if result.status:
+                documents = result.rows
+        except Exception as e:
+            traceback.print_exc()
+            flash("There was an error searching the documents", "danger")
+    
+    return render_template("books_of_year.html", documents=documents)

@@ -115,6 +115,16 @@ def checkout():
 
         # Perform the checkout process
         try:
+            check_limit_query = f'''
+            SELECT COUNT(RID) AS VAL
+            FROM BORROWING NATURAL JOIN BORROWS
+            WHERE RDTIME IS NULL AND RID = {reader_id}
+            '''
+            check_limit_result = DB.selectOne(check_limit_query,args)
+            print("check_limit_result",check_limit_result)
+            if check_limit_result.row["VAL"] > 9:
+                flash("Reader Limit: 10 Copies already taken", "warning")
+                return redirect(url_for("reader.checkout", doc_id=doc_id, copy_no=copy_no, bid=bid))
             # Insert current time into BORROWING table
             current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             insert_borrowing_query = "INSERT INTO BORROWING (BDTIME) VALUES (%(current_time)s)"
