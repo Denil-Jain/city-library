@@ -8,9 +8,9 @@
 # - Get number N and branch number I as input and print the N most borrowed books in branch I. (#DONE 24-04-2024 route(/branch_most_borrowed_books))
 # - Get number N as input and print the N most borrowed books in the library. (#DONE 24-04-2024 route(/most_borrowed_books))
 # - Get a year as input and print the 10 most popular books of that year in the library. (#DONE 28-04-2024 route(/books_of_year))
-# - Get a start date S and an end date E as input and print, for each branch, the branch
-# Id and name and the average fine paid by the borrowers for documents borrowed
-# from this branch during the corresponding period of time.
+# - Get a start date S and an end date E as input and print, for each branch, the branch ($DONE 30-04-2024)
+#       Id and name and the average fine paid by the borrowers for documents borrowed
+#       from this branch during the corresponding period of time.
 
 from flask import Blueprint, redirect, request, render_template, url_for, flash
 import traceback
@@ -322,3 +322,41 @@ def books_of_year():
             flash("There was an error searching the documents", "danger")
     
     return render_template("books_of_year.html", documents=documents)
+
+
+# - Get a start date S and an end date E as input and print, for each branch, the branch
+#       Id and name and the average fine paid by the borrowers for documents borrowed
+#       from this branch during the corresponding period of time.
+@admin.route("/fine_paid", methods=["GET","POST"])
+def fine_paid():
+    branches = []
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    query = f"""
+    SELECT BRANCH.BID, BNAME, 
+        SUM(CASE WHEN fine IS NOT NULL THEN fine ELSE 0 END) AS FINE
+    FROM BRANCH 
+    LEFT JOIN BORROWS ON BORROWS.`BID` = BRANCH.BID 
+    LEFT JOIN (SELECT `BOR_NO`,RDTIME,
+                        (CASE
+                            WHEN RDTIME IS NOT NULL THEN (CASE WHEN DATEDIFF(RDTIME, BDTIME) > 20 
+                            THEN (DATEDIFF(RDTIME, BDTIME) - 20) * 0.20 ELSE 0 END) 
+                            ELSE 0
+                        END) AS fine
+                    FROM BORROWING 
+                    NATURAL JOIN BORROWS 
+                    WHERE RDTIME BETWEEN '{start_date}' AND '{end_date}') AS BOR ON `BOR`.`BOR_NO` = BORROWS.`BOR_NO`
+    GROUP BY BRANCH.BID, BNAME;
+    """
+    print(query)
+
+    if start_date and end_date:
+        try:
+            result = DB.selectAll(query, {})
+            if result.status:
+                branches = result.rows
+        except Exception as e:
+            traceback.print_exc()
+            flash("There was an error searching the documents", "danger")
+    
+    return render_template("fine_paid.html", branches=branches)
