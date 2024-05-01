@@ -79,7 +79,14 @@ def list_document_copies():
     
     args = {}
     query = """
-        SELECT C.COPYNO, D.DOCID, D.TITLE, D.PUBLISHERID, B.BID, B.BNAME, B.BLOCATION
+        SELECT C.COPYNO, D.DOCID, D.TITLE, D.PUBLISHERID, B.BID, B.BNAME, B.BLOCATION, CASE 
+            WHEN (C.COPYNO, D.DOCID, B.BID) IN (SELECT COPYNO, DOCID, BID
+                                                FROM BORROWS 
+                                                NATURAL JOIN BORROWING
+                                                WHERE RDTIME IS NULL)
+            THEN 1
+            ELSE 0 
+        END AS STATUS
         FROM DOCUMENT D
         JOIN COPY C ON D.DOCID = C.DOCID
         JOIN BRANCH B ON C.BID = B.BID
@@ -102,7 +109,7 @@ def list_document_copies():
         flash(str(e), "danger")
         copies = []
 
-    return render_template("list_document_copies.html", copies=copies)
+    return render_template("list_document_copies_status.html", copies=copies)
 
 
 @admin.route("/add_reader", methods=["GET","POST"])
