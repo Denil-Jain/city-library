@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Search Document{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Most Frequent Borrower</h3>
+    <form method="GET">
+        <div class="row">
+            <div class="col">
+                <label for="TOP_B">Top Most Frequent Borrower</label>
+                <input type="number" class="form-control" id="TOP_B" name="TOP_B" placeholder="Number">
+            </div>
+            <div class="col">
+                <label for="BID">Branch ID</label>
+                <input type="number" class="form-control" id="BID" name="BID" placeholder="Number">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+    {% if readers %}
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>RID</th>
+                    <th>Reader</th>
+                    <th>Number of books</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reader in readers %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ reader.RID }}</td>
+                        <td>{{ reader.RNAME }}</td>
+                        <td>{{ reader.NBOOKS }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No readers found.</p>
+    {% endif %}
+</div>
+{% endblock %}

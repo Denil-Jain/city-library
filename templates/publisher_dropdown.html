@@ -1,0 +1,14 @@
+{% macro publisher_dropdown(val="") %}
+{% set pubs = get_publishers() %}
+
+<label for="PUBLISHERID" class="visually-hidden">Publisher</label>
+<select class="form-select mb-3" name="PUBLISHERID" id="PUBLISHERID"
+    value="{{val or ''}}">
+    <option value="">No Publisher</option>
+    {% for p in pubs %}
+    {# example of using external data setting and casting #}
+    <option {{'selected' if val|string==p['PUBLISHERID']|string}} value="{{p['PUBLISHERID']}}">
+        {{p['PUBNAME']}}</option>
+    {% endfor %}
+</select>
+{% endmacro %}

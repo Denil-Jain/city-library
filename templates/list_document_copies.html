@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}Document Copies Information{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Document Copies Information</h3>
+    <form method="GET">
+        <div class="row">
+            <div class="col">
+                <label for="doc_name">Document Name</label>
+                <input type="text" class="form-control" id="doc_name" name="doc_name" placeholder="Document Name" value="{{ request.args.get('doc_name') or ''}}">
+            </div>
+            <div class="col">
+                <label for="doc_id">Document ID</label>
+                <input type="text" class="form-control" id="doc_id" name="doc_id" placeholder="Document ID" value="{{ request.args.get('doc_id') or ''}}">
+            </div>
+            <div class="col">
+                <label for="bid">Branch ID</label>
+                <input type="text" class="form-control" id="bid" name="bid" placeholder="Branch ID" value="{{ request.args.get('bid') or ''}}">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col">
+                <a href="?" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+    {% if copies %}
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Copy Number</th>
+                    <th>Document ID</th>
+                    <th>Title</th>
+                    <th>Publisher ID</th>
+                    <th>Branch ID</th>
+                    <th>Branch Name</th>
+                    <th>Branch Location</th>
+                    <th>Action</th> <!-- Added action column -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for copy in copies %}
+                    <tr>
+                        <td>{{ copy.COPYNO }}</td>
+                        <td>{{ copy.DOCID }}</td>
+                        <td>{{ copy.TITLE }}</td>
+                        <td>{{ copy.PUBLISHERID }}</td>
+                        <td>{{ copy.BID }}</td>
+                        <td>{{ copy.BNAME }}</td>
+                        <td>{{ copy.BLOCATION }}</td>
+                        <td>
+                            <a href="{{ url_for('reader.checkout', doc_id=copy.DOCID, copy_no=copy.COPYNO, bid=copy.BID) }}" class="btn btn-primary">Checkout</a>
+                        </td>                                             
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No document copies found.</p>
+    {% endif %}
+</div>
+{% endblock %}

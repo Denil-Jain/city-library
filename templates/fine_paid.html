@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block title %}Fine Paid{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Calculate Average Fine Paid</h3>
+    <form method="GET" action="{{ url_for('admin.fine_paid') }}">
+        <div class="row">
+            <div class="col">
+                <label for="start_date">Start Date</label>
+                <input type="date" class="form-control" id="start_date" name="start_date">
+            </div>
+            <div class="col">
+                <label for="end_date">End Date</label>
+                <input type="date" class="form-control" id="end_date" name="end_date">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+    {% if branches %}
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Branch ID</th>
+                    <th>Branch Name</th>
+                    <th>Average Fine</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for branch in branches %}
+                    <tr>
+                        <td>{{ branch.BID }}</td>
+                        <td>{{ branch.BNAME }}</td>
+                        <td>{{ branch.FINE }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+</div>
+{% endblock %}

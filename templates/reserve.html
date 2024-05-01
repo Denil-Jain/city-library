@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Reserve Document Copy{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Reserve Document Copy</h3>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="reader_id" class="form-label">Reader ID</label>
+            <input type="text" class="form-control" id="reader_id" name="reader_id" placeholder="Enter Reader ID">
+        </div>
+        <!-- Hidden fields to store document copy information -->
+        <input type="hidden" name="doc_id" value="{{ copy_info.DOCID }}">
+        <input type="hidden" name="copy_no" value="{{ copy_info.COPYNO }}">
+        <input type="hidden" name="bid" value="{{ copy_info.BID }}">
+        <button type="submit" class="btn btn-primary">Reserve</button>
+    </form>
+</div>
+{% endblock %}
