@@ -210,7 +210,7 @@ def most_borrowed_books():
     documents = []
     
     query = """
-    SELECT DOCID, TITLE, PUBNAME
+    SELECT DOCID, TITLE, PUBNAME, COUNT(DOCID) AS CONT
     FROM BORROWS NATURAL JOIN DOCUMENT NATURAL JOIN PUBLISHER
     GROUP BY DOCID, TITLE, PUBNAME
     ORDER BY COUNT(DOCID) DESC
@@ -242,7 +242,7 @@ def branch_most_borrowed_books():
     documents = []
     
     query = """
-    SELECT DOCID, TITLE, PUBNAME
+    SELECT DOCID, TITLE, PUBNAME, COUNT(DOCID) AS CONT
     FROM BORROWS NATURAL JOIN DOCUMENT NATURAL JOIN PUBLISHER
     WHERE 1=1 
     """

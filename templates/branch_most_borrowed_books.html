@@ -26,6 +26,7 @@
                     <th>Document ID</th>
                     <th>Title</th>
                     <th>Publisher</th>
+                    <th>Count</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,6 +36,7 @@
                         <td>{{ document.DOCID }}</td>
                         <td>{{ document.TITLE }}</td>
                         <td>{{ document.PUBNAME }}</td>
+                        <td>{{ document.CONT }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
